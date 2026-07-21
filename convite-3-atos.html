@@ -289,6 +289,9 @@ body.locked{overflow:hidden;height:100vh}
 </div></div>
 
 <script>
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+scrollTo(0, 0);
+
 /* ================= EDITAR: RSVP ================= */
 const RSVP = {
   whatsapp: "5598999999999",  // DDI+DDD+número, só dígitos
@@ -318,6 +321,7 @@ function startVideo(){
 function revealInvite(){
   document.getElementById('cover').classList.add('hide');
   document.body.classList.remove('locked');
+  scrollTo(0, 0);
 
   document.querySelector('#intro .eyebrow').classList.add('in');
   setTimeout(()=> document.querySelector('#intro .hero-names').classList.add('in'), 350);
