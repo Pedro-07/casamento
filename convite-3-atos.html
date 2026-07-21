@@ -22,21 +22,22 @@ body.locked{overflow:hidden;height:100vh}
 /* ================= CAPA / TOQUE PARA ABRIR ================= */
 #cover{position:fixed;inset:0;z-index:50;cursor:pointer}
 #cover.hide{pointer-events:none}
-#cover .cover-panel{position:absolute;top:0;bottom:0;width:50%;background:var(--paper);transition:transform 1.1s cubic-bezier(.76,0,.24,1)}
+#cover .cover-panel{position:absolute;top:0;bottom:0;width:50%;background:var(--paper);overflow:hidden;transition:transform 1.1s cubic-bezier(.76,0,.24,1)}
 #cover .cover-panel.left{left:0}
 #cover .cover-panel.right{right:0}
 #cover.hide .cover-panel.left{transform:translateX(-100%)}
 #cover.hide .cover-panel.right{transform:translateX(100%)}
+#cover .cover-video{position:absolute;top:0;height:100%;width:200%;object-fit:cover}
+#cover .cover-panel.left .cover-video{left:0}
+#cover .cover-panel.right .cover-video{right:0}
 #cover .cover-content{
   position:absolute;inset:0;z-index:1;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  text-align:center;padding:24px;
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-end;gap:6px;
+  text-align:center;padding:24px 24px 40px;
   transition:opacity .5s ease;
 }
 #cover.hide .cover-content{opacity:0}
-#cover .cover-mono{font-family:'Great Vibes',cursive;font-size:clamp(64px,20vw,108px);color:var(--olive);line-height:1}
-#cover .cover-names{font-family:'Great Vibes',cursive;font-size:clamp(30px,9vw,46px);color:var(--olive-deep);line-height:1.1}
-#cover .cover-tap{font-size:11px;letter-spacing:.28em;text-indent:.28em;text-transform:uppercase;color:var(--gold);margin-top:14px;animation:pulse 1.8s ease-in-out infinite}
+#cover .cover-tap{width:100%;font-size:11px;letter-spacing:.28em;text-indent:.28em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 6px rgba(0,0,0,.35);animation:pulse 1.8s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
 
 /* moldura que envolve a página inteira */
@@ -166,11 +167,9 @@ body.locked{overflow:hidden;height:100vh}
 </head>
 <body class="locked">
 <div id="cover">
-  <div class="cover-panel left"></div>
-  <div class="cover-panel right"></div>
+  <div class="cover-panel left"><video class="cover-video" src="capa.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+  <div class="cover-panel right"><video class="cover-video" src="capa.mp4" autoplay muted loop playsinline preload="auto"></video></div>
   <div class="cover-content">
-    <div class="cover-mono">JL</div>
-    <p class="cover-names">João Pedro &amp; Larissa</p>
     <p class="cover-tap">Toque para abrir o convite</p>
   </div>
 </div>
