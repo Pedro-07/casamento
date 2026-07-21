@@ -20,15 +20,22 @@ body{background:var(--paper);font-family:'Jost',sans-serif;color:var(--ink);over
 body.locked{overflow:hidden;height:100vh}
 
 /* ================= CAPA / TOQUE PARA ABRIR ================= */
-#cover{
-  position:fixed;inset:0;z-index:50;background:var(--paper);
+#cover{position:fixed;inset:0;z-index:50;cursor:pointer}
+#cover.hide{pointer-events:none}
+#cover .cover-panel{position:absolute;top:0;bottom:0;width:50%;background:var(--paper);transition:transform 1.1s cubic-bezier(.76,0,.24,1)}
+#cover .cover-panel.left{left:0}
+#cover .cover-panel.right{right:0}
+#cover.hide .cover-panel.left{transform:translateX(-100%)}
+#cover.hide .cover-panel.right{transform:translateX(100%)}
+#cover .cover-content{
+  position:absolute;inset:0;z-index:1;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  text-align:center;padding:24px;cursor:pointer;
-  transition:opacity .8s ease,visibility .8s ease;
+  text-align:center;padding:24px;
+  transition:opacity .5s ease;
 }
-#cover.hide{opacity:0;visibility:hidden;pointer-events:none}
+#cover.hide .cover-content{opacity:0}
 #cover .cover-mono{font-family:'Great Vibes',cursive;font-size:clamp(64px,20vw,108px);color:var(--olive);line-height:1}
-#cover .cover-names{font-family:'Cormorant Garamond',serif;font-size:clamp(13px,3.6vw,15px);letter-spacing:.32em;text-indent:.32em;text-transform:uppercase;color:var(--olive-deep)}
+#cover .cover-names{font-family:'Great Vibes',cursive;font-size:clamp(30px,9vw,46px);color:var(--olive-deep);line-height:1.1}
 #cover .cover-tap{font-size:11px;letter-spacing:.28em;text-indent:.28em;text-transform:uppercase;color:var(--gold);margin-top:14px;animation:pulse 1.8s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
 
@@ -48,9 +55,6 @@ body.locked{overflow:hidden;height:100vh}
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,1,.36,1)}
 .reveal.in{opacity:1;transform:none}
 
-.type-cursor{display:inline-block;width:2px;height:.78em;margin-left:3px;background:var(--olive-deep);vertical-align:-.08em;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-
 /* ================= ATO 1 — INTRODUÇÃO ================= */
 #intro{
   min-height:calc(100svh - 16px);
@@ -69,6 +73,8 @@ body.locked{overflow:hidden;height:100vh}
   margin:clamp(12px,4vw,20px) 0 clamp(8px,2.5vw,14px);
 }
 .hero-names .amp{color:var(--gold);font-size:.7em}
+.hero-names.reveal{opacity:1;transform:none;clip-path:inset(0 100% -0.3em 0);transition:clip-path 1.6s cubic-bezier(.65,0,.35,1)}
+.hero-names.reveal.in{clip-path:inset(0 0% -0.3em 0)}
 .hero-date{
   font-family:'Cormorant Garamond',serif;
   font-size:clamp(15px,4.2vw,18px);
@@ -160,9 +166,13 @@ body.locked{overflow:hidden;height:100vh}
 </head>
 <body class="locked">
 <div id="cover">
-  <div class="cover-mono">JL</div>
-  <p class="cover-names">João Pedro &amp; Larissa</p>
-  <p class="cover-tap">Toque para abrir o convite</p>
+  <div class="cover-panel left"></div>
+  <div class="cover-panel right"></div>
+  <div class="cover-content">
+    <div class="cover-mono">JL</div>
+    <p class="cover-names">João Pedro &amp; Larissa</p>
+    <p class="cover-tap">Toque para abrir o convite</p>
+  </div>
 </div>
 <div id="page"><div class="frame">
 
@@ -187,7 +197,7 @@ body.locked{overflow:hidden;height:100vh}
       </svg>
 
       <p class="eyebrow reveal">Nosso Casamento</p>
-      <h1 class="hero-names" id="heroNames" aria-label="João Pedro &amp; Larissa"><noscript>João Pedro &amp; Larissa</noscript></h1>
+      <h1 class="hero-names reveal">João Pedro <span class="amp">&amp;</span> Larissa</h1>
       <!-- EDITAR: data resumida -->
       <p class="hero-date reveal">21 · 08 · 2026</p>
       <div class="scroll-hint reveal" aria-hidden="true">
@@ -289,47 +299,15 @@ const io = new IntersectionObserver((entries)=>{
 document.querySelectorAll('#info .reveal, #rsvp .reveal').forEach(el=>io.observe(el));
 
 /* ================= CAPA: TOQUE PARA ABRIR ================= */
-let audioCtx;
-function tick(freq){
-  if (!audioCtx) return;
-  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-  o.type = 'triangle';
-  o.frequency.value = freq || (1300 + Math.random()*250);
-  const t = audioCtx.currentTime;
-  g.gain.setValueAtTime(.05, t);
-  g.gain.exponentialRampToValueAtTime(.0001, t + .045);
-  o.connect(g).connect(audioCtx.destination);
-  o.start(t); o.stop(t + .05);
-}
-
-function typeNames(){
-  const el = document.getElementById('heroNames');
-  const text = 'João Pedro & Larissa';
-  el.innerHTML = '<span class="type-cursor"></span>';
-  const cursor = el.querySelector('.type-cursor');
-  let i = 0;
-  (function step(){
-    if (i < text.length){
-      cursor.insertAdjacentText('beforebegin', text[i]);
-      if (text[i] !== ' ') tick();
-      i++;
-      setTimeout(step, 68);
-    } else {
-      el.innerHTML = text.replace('&', '<span class="amp">&amp;</span>');
-    }
-  })();
-}
-
 function openInvite(){
-  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
   document.getElementById('cover').classList.add('hide');
   document.body.classList.remove('locked');
 
   document.querySelector('#intro .eyebrow').classList.add('in');
-  setTimeout(typeNames, 450);
-  setTimeout(()=> document.querySelector('#intro .hero-date').classList.add('in'), 450 + 20*68 + 250);
-  setTimeout(()=> document.querySelector('#intro .scroll-hint').classList.add('in'), 450 + 20*68 + 550);
-  setTimeout(()=> document.querySelector('#intro .hero-photo').classList.add('in'), 450 + 20*68 + 750);
+  setTimeout(()=> document.querySelector('#intro .hero-names').classList.add('in'), 350);
+  setTimeout(()=> document.querySelector('#intro .hero-date').classList.add('in'), 350 + 1600 + 150);
+  setTimeout(()=> document.querySelector('#intro .scroll-hint').classList.add('in'), 350 + 1600 + 400);
+  setTimeout(()=> document.querySelector('#intro .hero-photo').classList.add('in'), 350 + 1600 + 600);
 }
 
 document.getElementById('cover').addEventListener('click', openInvite, {once:true});
