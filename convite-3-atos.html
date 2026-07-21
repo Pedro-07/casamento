@@ -37,8 +37,20 @@ body.locked{overflow:hidden;height:100vh}
   transition:opacity .5s ease;
 }
 #cover.hide .cover-content{opacity:0}
-#cover .cover-tap{width:100%;font-size:11px;letter-spacing:.28em;text-indent:.28em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 6px rgba(0,0,0,.35);animation:pulse 1.8s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+#cover .cover-card{
+  width:auto;max-width:80%;
+  background:rgba(251,249,242,.92);color:var(--olive-deep);
+  padding:11px 22px;border-radius:999px;
+  font-size:11px;letter-spacing:.22em;text-indent:.22em;text-transform:uppercase;
+  box-shadow:0 8px 24px -8px rgba(0,0,0,.4);
+  opacity:0;animation:cardIntro 3s ease forwards;
+}
+@keyframes cardIntro{
+  0%{opacity:0;transform:translateY(10px)}
+  12%{opacity:1;transform:translateY(0)}
+  82%{opacity:1;transform:translateY(0)}
+  100%{opacity:0;transform:translateY(6px)}
+}
 
 /* moldura que envolve a página inteira */
 #page{
@@ -167,10 +179,10 @@ body.locked{overflow:hidden;height:100vh}
 </head>
 <body class="locked">
 <div id="cover">
-  <div class="cover-panel left"><video class="cover-video" src="capa.mp4" autoplay muted loop playsinline preload="auto"></video></div>
-  <div class="cover-panel right"><video class="cover-video" src="capa.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+  <div class="cover-panel left"><video class="cover-video" src="capa.mp4" muted loop playsinline preload="auto"></video></div>
+  <div class="cover-panel right"><video class="cover-video" src="capa.mp4" muted loop playsinline preload="auto"></video></div>
   <div class="cover-content">
-    <p class="cover-tap">Toque para abrir o convite</p>
+    <p class="cover-card">Toque para abrir o laço</p>
   </div>
 </div>
 <div id="page"><div class="frame">
@@ -299,6 +311,7 @@ document.querySelectorAll('#info .reveal, #rsvp .reveal').forEach(el=>io.observe
 
 /* ================= CAPA: TOQUE PARA ABRIR ================= */
 function openInvite(){
+  document.querySelectorAll('#cover .cover-video').forEach(v => v.play());
   document.getElementById('cover').classList.add('hide');
   document.body.classList.remove('locked');
 
