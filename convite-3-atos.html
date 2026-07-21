@@ -36,7 +36,7 @@ body.locked{overflow:hidden;height:100vh}
   text-align:center;padding:24px 24px 40px;
   transition:opacity .5s ease;
 }
-#cover.hide .cover-content{opacity:0}
+#cover.playing .cover-content,#cover.hide .cover-content{opacity:0}
 #cover .cover-card{
   width:auto;max-width:80%;
   background:rgba(251,249,242,.92);color:var(--olive-deep);
@@ -179,8 +179,8 @@ body.locked{overflow:hidden;height:100vh}
 </head>
 <body class="locked">
 <div id="cover">
-  <div class="cover-panel left"><video class="cover-video" src="capa.mp4" poster="capa-poster.jpg" muted loop playsinline preload="auto"></video></div>
-  <div class="cover-panel right"><video class="cover-video" src="capa.mp4" poster="capa-poster.jpg" muted loop playsinline preload="auto"></video></div>
+  <div class="cover-panel left"><video class="cover-video" src="capa.mp4" poster="capa-poster.jpg" muted playsinline preload="auto"></video></div>
+  <div class="cover-panel right"><video class="cover-video" src="capa.mp4" poster="capa-poster.jpg" muted playsinline preload="auto"></video></div>
   <div class="cover-content">
     <p class="cover-card">Toque para abrir o laço</p>
   </div>
@@ -310,8 +310,14 @@ const io = new IntersectionObserver((entries)=>{
 document.querySelectorAll('#info .reveal, #rsvp .reveal').forEach(el=>io.observe(el));
 
 /* ================= CAPA: TOQUE PARA ABRIR ================= */
-function openInvite(){
-  document.querySelectorAll('#cover .cover-video').forEach(v => v.play());
+function startVideo(){
+  document.getElementById('cover').classList.add('playing');
+  const videos = document.querySelectorAll('#cover .cover-video');
+  videos.forEach(v => v.play());
+  videos[0].addEventListener('ended', revealInvite, {once:true});
+}
+
+function revealInvite(){
   document.getElementById('cover').classList.add('hide');
   document.body.classList.remove('locked');
 
@@ -322,7 +328,7 @@ function openInvite(){
   setTimeout(()=> document.querySelector('#intro .hero-photo').classList.add('in'), 350 + 1600 + 600);
 }
 
-document.getElementById('cover').addEventListener('click', openInvite, {once:true});
+document.getElementById('cover').addEventListener('click', startVideo, {once:true});
 </script>
 </body>
 </html>
