@@ -202,6 +202,56 @@ body.locked{overflow:hidden;height:100vh}
 .rsvp-foot .mini-mono{font-family:'Great Vibes',cursive;font-size:clamp(26px,7vw,36px);color:var(--olive);line-height:1}
 .rsvp-foot p{font-size:10.5px;letter-spacing:.28em;text-indent:.28em;text-transform:uppercase;color:var(--olive-deep);margin-top:6px;font-weight:300}
 
+/* ================= MODAL RSVP ================= */
+.modal-overlay{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(58,64,48,.55);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-card{
+  width:100%;max-width:380px;background:var(--paper);
+  border:1px solid var(--hairline);border-radius:18px;
+  padding:clamp(28px,8vw,38px) clamp(22px,6vw,30px);
+  text-align:center;position:relative;
+  transform:translateY(14px);opacity:0;transition:transform .35s cubic-bezier(.34,1.4,.64,1),opacity .35s ease;
+  max-height:88vh;overflow-y:auto;
+}
+.modal-overlay.open .modal-card{transform:translateY(0);opacity:1}
+.modal-close{
+  position:absolute;top:12px;right:14px;
+  background:none;border:none;color:var(--olive-deep);
+  font-size:20px;line-height:1;cursor:pointer;padding:4px;
+}
+.modal-mono{font-family:'Great Vibes',cursive;font-size:clamp(32px,9vw,42px);color:var(--olive);line-height:1;margin-bottom:6px}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:clamp(19px,5.2vw,23px);color:var(--olive-deep);font-weight:600}
+.modal-subtitle{font-size:12.5px;font-weight:300;line-height:1.55;color:var(--ink);margin-top:8px;opacity:.85}
+.rsvp-form{margin-top:clamp(20px,5.5vw,26px);text-align:left;display:flex;flex-direction:column;gap:14px}
+.rsvp-field label{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--olive-deep);margin-bottom:6px;font-weight:400}
+.rsvp-field input{
+  width:100%;border:1px solid var(--hairline);border-radius:10px;
+  padding:11px 13px;font-family:'Jost',sans-serif;font-size:14px;color:var(--ink);
+  background:var(--cream);
+}
+.rsvp-field input:focus{outline:2px solid var(--olive);outline-offset:1px}
+.rsvp-submit{
+  margin-top:4px;border:none;cursor:pointer;
+  padding:14px;border-radius:999px;
+  background:linear-gradient(160deg,#77835B,#556140);
+  color:#F3F0E4;font-size:13px;letter-spacing:.16em;text-indent:.16em;text-transform:uppercase;font-weight:400;
+  box-shadow:0 10px 22px -8px rgba(76,86,56,.6), inset 0 1px 0 rgba(255,255,255,.22);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.rsvp-submit:active{transform:scale(.97)}
+.rsvp-submit:disabled{opacity:.6;cursor:default}
+.rsvp-error{font-size:12px;color:#a24;margin-top:2px;display:none}
+.rsvp-error.show{display:block}
+.rsvp-success{display:none;text-align:center;padding:10px 0 4px}
+.rsvp-success.show{display:block}
+.rsvp-success svg{width:40px;height:40px;color:var(--olive-deep);margin-bottom:10px}
+.rsvp-success p{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--olive-deep);line-height:1.5}
+
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
   .reveal{opacity:1;transform:none}
@@ -333,10 +383,10 @@ body.locked{overflow:hidden;height:100vh}
     <!-- EDITAR: prazo de confirmação -->
     <p class="rsvp-deadline reveal">Até 12 de agosto de 2026</p>
 
-    <a id="lnk-rsvp" class="rsvp-btn reveal" target="_blank" rel="noopener">
+    <button id="btnOpenRsvp" type="button" class="rsvp-btn reveal">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5z"/></svg>
       Confirmar presença
-    </a>
+    </button>
 
     <div class="rsvp-foot reveal">
       <div class="mini-mono">JL</div>
@@ -346,19 +396,97 @@ body.locked{overflow:hidden;height:100vh}
 
 </div></div>
 
+<div id="rsvpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rsvpModalTitle">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="btnCloseRsvp" aria-label="Fechar">&times;</button>
+
+    <div id="rsvpFormWrap">
+      <div class="modal-mono">JL</div>
+      <h3 class="modal-title" id="rsvpModalTitle">Confirmar presença</h3>
+      <p class="modal-subtitle">Preencha os dados abaixo para confirmar sua presença no nosso casamento.</p>
+
+      <form id="rsvpForm" class="rsvp-form">
+        <div class="rsvp-field">
+          <label for="rsvpNome">Seu nome</label>
+          <input type="text" id="rsvpNome" name="nome" required autocomplete="name">
+        </div>
+        <div class="rsvp-field">
+          <label for="rsvpQtd">Quantidade de pessoas</label>
+          <input type="number" id="rsvpQtd" name="quantidade" min="1" max="20" value="1" required inputmode="numeric">
+        </div>
+        <div class="rsvp-field">
+          <label for="rsvpWhats">WhatsApp (opcional)</label>
+          <input type="tel" id="rsvpWhats" name="whatsapp" placeholder="(98) 99999-9999" autocomplete="tel">
+        </div>
+        <p class="rsvp-error" id="rsvpError">Não foi possível enviar. Tente novamente.</p>
+        <button type="submit" class="rsvp-submit" id="rsvpSubmitBtn">Enviar confirmação</button>
+      </form>
+    </div>
+
+    <div id="rsvpSuccessWrap" class="rsvp-success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      <p id="rsvpSuccessText">Presença confirmada! Obrigado.</p>
+    </div>
+  </div>
+</div>
+
 <script>
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 scrollTo(0, 0);
 
-/* ================= EDITAR: RSVP ================= */
-const RSVP = {
-  whatsapp: "5598999999999",  // DDI+DDD+número, só dígitos
-  mensagem: "Olá! Quero confirmar minha presença no casamento de João Pedro e Larissa."
-};
+/* ================= EDITAR: RSVP (planilha) ================= */
+const RSVP_ENDPOINT = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
 /* ======================================================== */
 
-document.getElementById('lnk-rsvp').href =
-  'https://wa.me/' + RSVP.whatsapp + '?text=' + encodeURIComponent(RSVP.mensagem);
+const rsvpModal = document.getElementById('rsvpModal');
+const rsvpForm = document.getElementById('rsvpForm');
+const rsvpFormWrap = document.getElementById('rsvpFormWrap');
+const rsvpSuccessWrap = document.getElementById('rsvpSuccessWrap');
+const rsvpError = document.getElementById('rsvpError');
+const rsvpSubmitBtn = document.getElementById('rsvpSubmitBtn');
+
+function openRsvpModal(){
+  rsvpModal.classList.add('open');
+  document.body.classList.add('locked');
+}
+function closeRsvpModal(){
+  rsvpModal.classList.remove('open');
+  document.body.classList.remove('locked');
+}
+
+document.getElementById('btnOpenRsvp').addEventListener('click', openRsvpModal);
+document.getElementById('btnCloseRsvp').addEventListener('click', closeRsvpModal);
+rsvpModal.addEventListener('click', (e)=>{ if (e.target === rsvpModal) closeRsvpModal(); });
+addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && rsvpModal.classList.contains('open')) closeRsvpModal(); });
+
+rsvpForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  rsvpError.classList.remove('show');
+  rsvpSubmitBtn.disabled = true;
+  rsvpSubmitBtn.textContent = 'Enviando...';
+
+  const nome = document.getElementById('rsvpNome').value.trim();
+  const quantidade = document.getElementById('rsvpQtd').value;
+  const whatsapp = document.getElementById('rsvpWhats').value.trim();
+
+  try{
+    await fetch(RSVP_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({nome, quantidade, whatsapp})
+    });
+    document.getElementById('rsvpSuccessText').textContent =
+      'Presença confirmada, ' + nome + '! Obrigado.';
+    rsvpFormWrap.style.display = 'none';
+    rsvpSuccessWrap.classList.add('show');
+  } catch(err){
+    rsvpError.classList.add('show');
+  } finally {
+    rsvpSubmitBtn.disabled = false;
+    rsvpSubmitBtn.textContent = 'Enviar confirmação';
+  }
+});
 
 /* copiar chave pix */
 document.getElementById('btnPixCopy').addEventListener('click', async ()=>{
